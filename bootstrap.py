@@ -95,6 +95,9 @@ def main():
     java_env = configuration(env)
     if env.get("LOCAL_DEVELOPMENT") != "true":
         write_ca(env["PG_CA_CERT_BASE64"])
+    nginx = ["nginx", "-p", "/tmp/", "-e", "stderr", "-c", "/app/nginx.conf"]
+    # Check permissions and configuration before starting migrations or creating an admin.
+    subprocess.run(nginx + ["-t"], check=True)
     children = []
     stopping = False
 
@@ -128,9 +131,9 @@ def main():
         ensure_admin(env)
         if stopping:
             return
-        proxy = subprocess.Popen(["nginx", "-c", "/app/nginx.conf", "-g", "daemon off;"])
+        proxy = subprocess.Popen(nginx + ["-g", "daemon off;"])
         children.append(proxy)
-        print("Metabase setup complete; public port 8080 is open.", flush=True)
+        print("Metabase setup complete; starting public proxy on port 8080.", flush=True)
         while not stopping:
             if any(child.poll() is not None for child in children):
                 raise RuntimeError("A required process exited.")

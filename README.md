@@ -44,7 +44,7 @@ Local Compose publishes only on loopback and explicitly disables PostgreSQL TLS 
 5. Configure the variables below. Keep credentials and the encryption key in Runtime secrets, outside Git.
 6. Publish **only HTTP port 8080**. The upstream image also advertises port 3000, but this template binds it to loopback for private setup. Do not add a public route to it.
 7. Set `MB_SITE_URL` to the generated HTTPS origin. If Runtime creates the app before its hostname is known, let the initial attempt fail closed, then set the variable and redeploy.
-8. Wait for migrations and the log message `Metabase setup complete; public port 8080 is open.` Sign in with the configured admin credentials.
+8. Wait for migrations and the log message `Metabase setup complete; starting public proxy on port 8080.` Confirm `/api/health` returns HTTP 200, then sign in with the configured admin credentials.
 
 | Variable | Purpose |
 | --- | --- |
