@@ -1,0 +1,13 @@
+services:
+  metabase:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - metabase-postgres
+    environment:
+      DATABASE_URL: postgresql://USER:PASSWORD@metabase-postgres:5432/defaultdb
+      # Set ADMIN_EMAIL, ADMIN_PASSWORD, MB_ENCRYPTION_SECRET_KEY,
+      # MB_SITE_URL, and PG_CA_CERT_BASE64 in Runtime before deployment.
+  metabase-postgres:
+    image: postgres:16

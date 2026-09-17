@@ -1,0 +1,32 @@
+services:
+  metabase:
+    build: .
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      # Encode credentials in a URI; Compose's default password example should use URL-safe characters.
+      DATABASE_URL: postgresql://metabase:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@postgres:5432/metabase
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?Set ADMIN_EMAIL in .env}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env}
+      MB_ENCRYPTION_SECRET_KEY: ${MB_ENCRYPTION_SECRET_KEY:?Set MB_ENCRYPTION_SECRET_KEY in .env}
+      MB_SITE_URL: http://localhost:8080
+      LOCAL_DEVELOPMENT: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    stop_grace_period: 40s
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: metabase
+      POSTGRES_USER: metabase
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U metabase -d metabase"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+volumes:
+  postgres-data:
